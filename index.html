@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Flores Para Ti</title>
+  <style>
+    :root {
+      --amarillo-neon: #ffd23f;
+      --amarillo-suave: #ffe27a;
+      --negro-fondo: #05070f;
+      --azul-noche: #0c1226;
+      --panel-oscuro: rgba(10, 12, 20, 0.85);
+      --borde-neon: rgba(255, 210, 63, 0.6);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: var(--negro-fondo);
+      color: var(--amarillo-suave);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .oculto { display: none !important; }
+
+    /* --- FONDO --- */
+    .fondo-estrellado {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 50% 100%, #2a1c12 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 0%, var(--azul-noche) 0%, var(--negro-fondo) 70%);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .fondo-estrellado::before,
+    .fondo-estrellado::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-repeat: repeat;
+      background-image:
+        radial-gradient(1.5px 1.5px at 20px 30px, #fff, transparent),
+        radial-gradient(1px 1px at 90px 80px, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 150px 140px, #fff, transparent),
+        radial-gradient(1px 1px at 200px 40px, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 260px 190px, #fff, transparent);
+      background-size: 280px 220px;
+      opacity: 0.6;
+      animation: desplazarEstrellas 90s linear infinite;
+    }
+
+    .fondo-estrellado::after {
+      background-size: 340px 260px;
+      animation-duration: 140s;
+      animation-direction: reverse;
+      opacity: 0.4;
+    }
+
+    @keyframes desplazarEstrellas {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-1000px); }
+    }
+
+    .destello {
+      position: fixed;
+      z-index: 1;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--amarillo-neon);
+      box-shadow: 0 0 8px 2px var(--amarillo-neon);
+      animation: flotarDestello linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes flotarDestello {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+    }
+
+    @keyframes parpadear {
+      0%, 100% { opacity: 0.3; }
+      50%      { opacity: 1; }
+    }
+
+    /* --- APP --- */
+    .app {
+      position: relative;
+      z-index: 10;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 20px 120px;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .app.mostrar { opacity: 1; }
+
+    .encabezado { position: relative; margin-bottom: 28px; }
+
+    .titulo-neon {
+      font-family: 'Brush Script MT', 'Segoe Script', cursive;
+      font-size: clamp(2.6rem, 9vw, 4.2rem);
+      line-height: 1.05;
+      margin: 0;
+      color: var(--amarillo-neon);
+      text-shadow:
+        0 0 6px var(--amarillo-neon),
+        0 0 14px var(--amarillo-neon),
+        0 0 26px rgba(255, 210, 63, 0.8),
+        0 0 46px rgba(255, 176, 0, 0.6);
+      animation: pulsoNeon 3.2s ease-in-out infinite;
+    }
+
+    .emoji-girasol {
+      display: inline-block;
+      filter: drop-shadow(0 0 10px var(--amarillo-neon));
+      animation: girarSuave 6s ease-in-out infinite;
+    }
+
+    @keyframes girarSuave {
+      0%, 100% { transform: rotate(-4deg); }
+      50%      { transform: rotate(4deg); }
+    }
+
+    @keyframes pulsoNeon {
+      0%, 100% {
+        text-shadow:
+          0 0 6px var(--amarillo-neon),
+          0 0 14px var(--amarillo-neon),
+          0 0 26px rgba(255, 210, 63, 0.8),
+          0 0 46px rgba(255, 176, 0, 0.6);
+      }
+      50% {
+        text-shadow:
+          0 0 10px var(--amarillo-neon),
+          0 0 22px var(--amarillo-neon),
+          0 0 38px rgba(255, 210, 63, 0.9),
+          0 0 64px rgba(255, 176, 0, 0.75);
+      }
+    }
+
+    .subrayado-neon {
+      width: 70%;
+      max-width: 320px;
+      height: 4px;
+      margin: 10px auto 0;
+      border-radius: 4px;
+      background: var(--amarillo-neon);
+      box-shadow: 0 0 8px var(--amarillo-neon), 0 0 18px var(--amarillo-neon);
+    }
+
+    /* --- REPRODUCTOR --- */
+    .reproductor {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      max-width: 480px;
+      margin: 0 auto 40px;
+      padding: 14px 20px;
+      background: var(--panel-oscuro);
+      border: 1px solid var(--borde-neon);
+      border-radius: 50px;
+      box-shadow:
+        0 0 12px rgba(255, 210, 63, 0.35),
+        inset 0 0 20px rgba(255, 210, 63, 0.05);
+      backdrop-filter: blur(6px);
+    }
+
+    .btn-play {
+      flex-shrink: 0;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: none;
+      background: var(--amarillo-neon);
+      box-shadow: 0 0 12px var(--amarillo-neon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .btn-play:hover { transform: scale(1.06); }
+    .btn-play:active { transform: scale(0.95); }
+    .icono-play { pointer-events: none; }
+    .reproductor-info { flex: 1; text-align: left; }
+
+    .reproductor-titulo {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .barra-progreso-contenedor {
+      position: relative;
+      width: 100%;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+    }
+
+    .barra-progreso {
+      position: absolute;
+      left: 0; top: 0;
+      height: 100%;
+      width: 0%;
+      border-radius: 4px;
+      background: var(--amarillo-neon);
+      box-shadow: 0 0 6px var(--amarillo-neon);
+    }
+
+    .barra-punto {
+      position: absolute;
+      top: 50%; left: 0%;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--amarillo-neon);
+      box-shadow: 0 0 6px var(--amarillo-neon);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .reproductor-tiempos {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* --- ESCENARIO Y RAMO --- */
+    .escenario {
+      position: relative;
+      width: 100%;
+      z-index: 15;
+    }
+
+    /* El ramo mantiene siempre la proporción 480x520, así los tallos
+       (SVG) y las flores (posicionadas en %) quedan alineados en
+       cualquier pantalla. */
+    .ramo {
+      position: relative;
+      width: min(480px, 100%);
+      aspect-ratio: 480 / 520;
+      margin: 0 auto;
+    }
+
+    /* --- TALLOS --- */
+    .tallos-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .tallo-grupo {
+      transform-box: view-box;
+      transform-origin: 240px 500px; /* base del ramo */
+      animation: latido 2.6s ease-in-out infinite;
+      animation-delay: calc(1.5s + var(--i) * 0.18s);
+    }
+
+    .tallo {
+      fill: none;
+      stroke: url(#gradTallo);
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: crecerTallo 1.4s ease-out forwards;
+      animation-delay: calc(var(--i) * 0.08s);
+    }
+
+    /* Brillo central del tallo, para que se vea como cinta/tallo plano */
+    .tallo-luz {
+      fill: none;
+      stroke: #cfe6a8;
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      opacity: 0;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: crecerTalloLuz 1.4s ease-out forwards;
+      animation-delay: calc(var(--i) * 0.08s);
+    }
+
+    @keyframes crecerTallo {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes crecerTalloLuz {
+      to { stroke-dashoffset: 0; opacity: 0.22; }
+    }
+
+    /* --- LATIDO (flor + su tallo, desde la base del ramo) --- */
+    @keyframes latido {
+      0%   { transform: scale(1); }
+      12%  { transform: scale(1.055); }
+      24%  { transform: scale(1.008); }
+      34%  { transform: scale(1.032); }
+      48%  { transform: scale(1); }
+      100% { transform: scale(1); }
+    }
+
+    /* Cada flor va dentro de una capa que cubre todo el ramo y se escala
+       desde el mismo punto base que su tallo: así flor y tallo laten juntos. */
+    .flor-wrap {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      transform-origin: 50% 96.15%; /* = 240px 500px del viewBox */
+      animation: latido 2.6s ease-in-out infinite;
+      animation-delay: calc(1.5s + var(--i) * 0.18s);
+    }
+
+    .flor {
+      position: absolute;
+      display: block;
+      overflow: visible;
+      filter: drop-shadow(0 0 14px rgba(255, 200, 40, 0.55));
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+    }
+
+    .flor-central  { width: 37.5%; height: auto; aspect-ratio: 1 / 1; }
+    .flor-satelite { width: 27.083%; height: auto; aspect-ratio: 1 / 1; }
+
+    /* --- FLOR SORPRESA --- */
+    .contenedor-sorpresa {
+      position: absolute;
+      top: 2%;
+      right: 4%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: aparecerSorpresa 1s ease-out 3s forwards;
+      z-index: 30;
+    }
+
+    .aviso-clic {
+      font-family: 'Segoe Script', 'Brush Script MT', cursive;
+      font-size: 0.95rem;
+      color: var(--amarillo-neon);
+      text-shadow: 0 0 6px rgba(255, 210, 63, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .flecha-indicadora {
+      color: var(--amarillo-neon);
+      animation: moverFlecha 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes moverFlecha {
+      from { transform: translateX(0); }
+      to { transform: translateX(5px); }
+    }
+
+    .flor-sorpresa {
+      width: 64px;
+      height: 96px;
+      display: block;
+      overflow: visible;
+      cursor: pointer;
+      filter: drop-shadow(0 0 10px var(--amarillo-neon));
+      transform-origin: 50% 100%;
+      animation: latido 2.6s ease-in-out infinite;
+    }
+
+    .flor-sorpresa .tallo-sorpresa {
+      fill: none;
+      stroke: url(#gradTallo);
+      stroke-width: 12;
+      stroke-linecap: round;
+    }
+
+    @keyframes aparecerSorpresa {
+      from { opacity: 0; transform: scale(0.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .flor-sorpresa:hover {
+      filter: drop-shadow(0 0 18px var(--amarillo-neon));
+    }
+
+    /* --- NOTAS --- */
+    .nota {
+      position: absolute;
+      font-family: 'Segoe Script', 'Brush Script MT', cursive;
+      font-size: 1.1rem;
+      line-height: 1.25;
+      color: var(--amarillo-neon);
+      text-shadow: 0 0 8px rgba(255, 210, 63, 0.7);
+      margin: 0;
+      opacity: 0;
+      animation: aparecerFundido 1s ease-out forwards;
+      max-width: 140px;
+      z-index: 15;
+    }
+
+    .nota span { font-size: 0.9rem; display: block; }
+
+    .nota-1 { top: 15px; left: 15px; animation-delay: 3.4s; text-align: left; }
+    .nota-2 { top: 140px; right: 15px; animation-delay: 3.6s; text-align: right; }
+    .nota-3 { top: 48%; right: 10px; animation-delay: 3.8s; text-align: right; }
+    .nota-4 { bottom: 10px; left: 15px; animation-delay: 4s; text-align: left; }
+
+    /* En pantallas anchas hay espacio a los lados del ramo: las frases
+       se separan de las flores para que no se encimen con los pétalos. */
+    @media (min-width: 820px) {
+      .nota-1 { left: -10px; }
+      .nota-2 { right: -10px; }
+      .nota-3 { right: -55px; max-width: none; }
+      .nota-4 { left: -30px; }
+    }
+
+    @keyframes aparecerFundido {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- MODAL --- */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(3, 5, 12, 0.88);
+      backdrop-filter: blur(4px);
+      animation: aparecerFundido 0.3s ease-out forwards;
+    }
+
+    .modal-caja {
+      position: relative;
+      max-width: 380px;
+      width: 100%;
+      padding: 40px 28px 32px;
+      text-align: center;
+      background: var(--panel-oscuro);
+      border: 1px solid var(--borde-neon);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(255, 210, 63, 0.45);
+      animation: crecerModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes crecerModal {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-emoji {
+      font-size: 2.4rem;
+      margin: 0 0 12px;
+      filter: drop-shadow(0 0 10px var(--amarillo-neon));
+    }
+
+    .modal-mensaje {
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #fff9e8;
+      white-space: pre-line;
+    }
+
+    .modal-cerrar {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid var(--borde-neon);
+      background: transparent;
+      color: var(--amarillo-neon);
+      font-size: 1rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: background 0.15s ease;
+    }
+
+    .modal-cerrar:hover { background: rgba(255, 210, 63, 0.15); }
+
+    /* --- LOADER --- */
+    .loader-pantalla {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 26px;
+      background: #000;
+      transition: opacity 0.6s ease;
+    }
+
+    .loader-pantalla.ocultar { opacity: 0; pointer-events: none; }
+    .loader-girasol { width: 170px; height: 170px; overflow: visible; }
+
+    .loader-petalo {
+      fill: url(#gradPetaloCarga);
+      transform-box: view-box;
+      transform-origin: 100px 100px;
+      opacity: 0;
+      transform: scale(0.25);
+      transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .loader-petalo.mostrar { opacity: 1; transform: scale(1); }
+
+    .loader-titulo {
+      font-family: 'Segoe Script', 'Brush Script MT', cursive;
+      font-size: 1.5rem;
+      margin: 0;
+      color: var(--amarillo-neon);
+      text-shadow: 0 0 10px var(--amarillo-neon), 0 0 22px rgba(255, 210, 63, 0.6);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .loader-titulo.mostrar { opacity: 1; transform: translateY(0); }
+
+    .loader-cargando {
+      margin: 0;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+      opacity: 0;
+      transition: opacity 0.6s ease 0.15s;
+    }
+
+    .loader-cargando.mostrar {
+      opacity: 1;
+      animation: parpadear 1.4s ease-in-out 0.7s infinite;
+    }
+
+    /* --- MEDIA QUERIES --- */
+    @media (max-width: 480px) {
+      .nota { font-size: 0.9rem; max-width: 110px; }
+      .contenedor-sorpresa { right: 2%; top: 2%; }
+      .aviso-clic { font-size: 0.8rem; }
+      .flor-sorpresa { width: 52px; height: 78px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tallo-grupo, .flor-wrap, .flor-sorpresa { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="loader-pantalla" id="loaderPantalla">
+    <svg class="loader-girasol" viewBox="0 0 200 200" role="img" aria-label="Cargando girasol">
+      <g transform="rotate(0 100 100)"><use class="loader-petalo" data-orden="1" href="#petaloCarga" /></g>
+      <g transform="rotate(51.4 100 100)"><use class="loader-petalo" data-orden="2" href="#petaloCarga" /></g>
+      <g transform="rotate(102.9 100 100)"><use class="loader-petalo" data-orden="3" href="#petaloCarga" /></g>
+      <g transform="rotate(154.3 100 100)"><use class="loader-petalo" data-orden="4" href="#petaloCarga" /></g>
+      <g transform="rotate(205.7 100 100)"><use class="loader-petalo" data-orden="5" href="#petaloCarga" /></g>
+      <g transform="rotate(257.1 100 100)"><use class="loader-petalo" data-orden="6" href="#petaloCarga" /></g>
+      <g transform="rotate(308.6 100 100)"><use class="loader-petalo" data-orden="7" href="#petaloCarga" /></g>
+    </svg>
+    <p class="loader-titulo" id="loaderTitulo">Este 21 de septiembre</p>
+    <p class="loader-cargando" id="loaderCargando">Cargando<span class="loader-puntos">...</span></p>
+  </div>
+
+  <div class="fondo-estrellado" id="fondoEstrellado"></div>
+
+  <div class="app">
+    <header class="encabezado">
+      <h1 class="titulo-neon">
+        Flores<br />
+        Para Ti <span class="emoji-girasol">🌻</span>
+      </h1>
+      <div class="subrayado-neon"></div>
+    </header>
+
+    <div class="reproductor" id="reproductor">
+      <button class="btn-play" id="btnPlay" aria-label="Reproducir o pausar música">
+        <svg id="iconoPlay" class="icono-play" viewBox="0 0 24 24" width="20" height="20">
+          <polygon points="6,4 20,12 6,20" fill="#151515"></polygon>
+        </svg>
+        <svg id="iconoPause" class="icono-play oculto" viewBox="0 0 24 24" width="20" height="20">
+          <rect x="5" y="4" width="5" height="16" fill="#151515"></rect>
+          <rect x="14" y="4" width="5" height="16" fill="#151515"></rect>
+        </svg>
+      </button>
+
+      <div class="reproductor-info">
+        <p class="reproductor-titulo">Feliz 21 de septiembre <span class="corazon">❤️</span></p>
+        <div class="barra-progreso-contenedor" id="barraContenedor">
+          <div class="barra-progreso" id="barraProgreso"></div>
+          <div class="barra-punto" id="barraPunto"></div>
+        </div>
+        <div class="reproductor-tiempos">
+          <span id="tiempoActual">0:00</span>
+          <span id="tiempoTotal">0:00</span>
+        </div>
+      </div>
+      <audio id="audioMusica" src="A/floresamarillas.mp3" preload="metadata"></audio>
+    </div>
+
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <radialGradient id="gradPetalo" cx="50%" cy="15%" r="90%">
+          <stop offset="0%" stop-color="#fff6c9" />
+          <stop offset="45%" stop-color="#ffd23f" />
+          <stop offset="100%" stop-color="#f2a900" />
+        </radialGradient>
+        <radialGradient id="gradCentro" cx="42%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#6b4a1e" />
+          <stop offset="55%" stop-color="#4a3011" />
+          <stop offset="100%" stop-color="#2b1a08" />
+        </radialGradient>
+        <pattern id="texturaCentro" width="9" height="9" patternUnits="userSpaceOnUse">
+          <circle cx="4.5" cy="4.5" r="1.6" fill="#000" opacity="0.35" />
+        </pattern>
+        <path id="petaloGirasol" d="M100,102 C82,78 78,40 100,8 C122,40 118,78 100,102 Z" />
+
+        <radialGradient id="gradPetaloCarga" cx="50%" cy="20%" r="85%">
+          <stop offset="0%" stop-color="#d8b23a" />
+          <stop offset="55%" stop-color="#8a6a1f" />
+          <stop offset="100%" stop-color="#3a2a10" />
+        </radialGradient>
+        <path id="petaloCarga" d="M100,100 C80,88 72,55 100,18 C128,55 120,88 100,100 Z" />
+
+        <!-- Verde apagado tipo "sage", como en la referencia -->
+        <linearGradient id="gradTallo" x1="0" y1="0" x2="0" y2="520" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#9dbd7d" />
+          <stop offset="45%" stop-color="#6f9358" />
+          <stop offset="100%" stop-color="#456638" />
+        </linearGradient>
+      </defs>
+
+      <symbol id="girasol" viewBox="0 0 200 200">
+        <g fill="url(#gradPetalo)" stroke="#c97a00" stroke-width="0.6">
+          <use href="#petaloGirasol" transform="rotate(0 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(22.5 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(45 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(67.5 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(90 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(112.5 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(135 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(157.5 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(180 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(202.5 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(225 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(247.5 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(270 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(292.5 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(315 100 100)" />
+          <use href="#petaloGirasol" transform="rotate(337.5 100 100)" />
+        </g>
+        <circle cx="100" cy="100" r="36" fill="url(#gradCentro)" />
+        <circle cx="100" cy="100" r="36" fill="url(#texturaCentro)" />
+        <circle cx="100" cy="100" r="36" fill="none" stroke="#1b0f04" stroke-width="1.5" />
+        <ellipse cx="88" cy="86" rx="10" ry="6" fill="#fff" opacity="0.15" />
+      </symbol>
+    </svg>
+
+    <main class="escenario">
+      <div class="ramo" id="ramo">
+
+        <!-- ===== TALLOS: uno por flor, todos convergen en la base (240,500) ===== -->
+        <svg class="tallos-svg" viewBox="0 0 480 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <!-- Cada tallo termina EXACTAMENTE en el centro de su flor -->
+          <g class="tallo-grupo" style="--i:0">
+            <path class="tallo"     pathLength="1" d="M 240 500 L 240 70" />
+            <path class="tallo-luz" pathLength="1" d="M 240 500 L 240 70" />
+          </g>
+          <g class="tallo-grupo" style="--i:1">
+            <path class="tallo"     pathLength="1" d="M 240 500 L 240 230" />
+            <path class="tallo-luz" pathLength="1" d="M 240 500 L 240 230" />
+          </g>
+          <g class="tallo-grupo" style="--i:2">
+            <path class="tallo"     pathLength="1" d="M 240 500 C 214 400 160 270 130 150" />
+            <path class="tallo-luz" pathLength="1" d="M 240 500 C 214 400 160 270 130 150" />
+          </g>
+          <g class="tallo-grupo" style="--i:3">
+            <path class="tallo"     pathLength="1" d="M 240 500 C 266 400 320 270 350 150" />
+            <path class="tallo-luz" pathLength="1" d="M 240 500 C 266 400 320 270 350 150" />
+          </g>
+          <g class="tallo-grupo" style="--i:4">
+            <path class="tallo"     pathLength="1" d="M 240 500 C 185 429 105 350 80 280" />
+            <path class="tallo-luz" pathLength="1" d="M 240 500 C 185 429 105 350 80 280" />
+          </g>
+          <g class="tallo-grupo" style="--i:5">
+            <path class="tallo"     pathLength="1" d="M 240 500 C 295 429 375 350 400 280" />
+            <path class="tallo-luz" pathLength="1" d="M 240 500 C 295 429 375 350 400 280" />
+          </g>
+          <g class="tallo-grupo" style="--i:6">
+            <path class="tallo"     pathLength="1" d="M 240 500 C 186 475 150 440 120 390" />
+            <path class="tallo-luz" pathLength="1" d="M 240 500 C 186 475 150 440 120 390" />
+          </g>
+          <g class="tallo-grupo" style="--i:7">
+            <path class="tallo"     pathLength="1" d="M 240 500 C 294 475 330 440 360 390" />
+            <path class="tallo-luz" pathLength="1" d="M 240 500 C 294 475 330 440 360 390" />
+          </g>
+        </svg>
+
+        <!-- ===== FLORES: cada una late con el mismo retraso que su tallo ===== -->
+
+        <!-- 1. FLOR SUPERIOR CENTRO -->
+        <div class="flor-wrap" style="--i:0; z-index: 12;">
+          <svg class="flor flor-satelite" viewBox="0 0 200 200" style="left: 50%; top: 13.462%; transform: translate(-50%, -50%) rotate(0.0deg);" role="img" aria-label="Flor superior">
+            <use href="#girasol" width="100%" height="100%" />
+          </svg>
+        </div>
+
+        <!-- 2. FLOR CENTRAL GRANDE -->
+        <div class="flor-wrap" style="--i:1; z-index: 25;">
+          <svg class="flor flor-central" viewBox="0 0 200 200" style="left: 50%; top: 44.231%; transform: translate(-50%, -50%) rotate(0.0deg);" role="img" aria-label="Flor central">
+            <use href="#girasol" width="100%" height="100%" />
+          </svg>
+        </div>
+
+        <!-- 3. FLOR IZQUIERDA ARRIBA -->
+        <div class="flor-wrap" style="--i:2; z-index: 14;">
+          <svg class="flor flor-satelite" viewBox="0 0 200 200" style="left: 27.083%; top: 28.846%; transform: translate(-50%, -50%) rotate(8.5deg);" role="img" aria-label="Flor izquierda arriba">
+            <use href="#girasol" width="100%" height="100%" />
+          </svg>
+        </div>
+
+        <!-- 4. FLOR DERECHA ARRIBA -->
+        <div class="flor-wrap" style="--i:3; z-index: 14;">
+          <svg class="flor flor-satelite" viewBox="0 0 200 200" style="left: 72.917%; top: 28.846%; transform: translate(-50%, -50%) rotate(-8.5deg);" role="img" aria-label="Flor derecha arriba">
+            <use href="#girasol" width="100%" height="100%" />
+          </svg>
+        </div>
+
+        <!-- 5. FLOR IZQUIERDA MEDIA -->
+        <div class="flor-wrap" style="--i:4; z-index: 16;">
+          <svg class="flor flor-satelite" viewBox="0 0 200 200" style="left: 16.667%; top: 53.846%; transform: translate(-50%, -50%) rotate(2.8deg);" role="img" aria-label="Flor izquierda media">
+            <use href="#girasol" width="100%" height="100%" />
+          </svg>
+        </div>
+
+        <!-- 6. FLOR DERECHA MEDIA -->
+        <div class="flor-wrap" style="--i:5; z-index: 16;">
+          <svg class="flor flor-satelite" viewBox="0 0 200 200" style="left: 83.333%; top: 53.846%; transform: translate(-50%, -50%) rotate(-2.8deg);" role="img" aria-label="Flor derecha media">
+            <use href="#girasol" width="100%" height="100%" />
+          </svg>
+        </div>
+
+        <!-- 7. FLOR IZQUIERDA BAJA -->
+        <div class="flor-wrap" style="--i:6; z-index: 18;">
+          <svg class="flor flor-satelite" viewBox="0 0 200 200" style="left: 25%; top: 75%; transform: translate(-50%, -50%) rotate(-8.5deg);" role="img" aria-label="Flor izquierda baja">
+            <use href="#girasol" width="100%" height="100%" />
+          </svg>
+        </div>
+
+        <!-- 8. FLOR DERECHA BAJA -->
+        <div class="flor-wrap" style="--i:7; z-index: 18;">
+          <svg class="flor flor-satelite" viewBox="0 0 200 200" style="left: 75%; top: 75%; transform: translate(-50%, -50%) rotate(8.5deg);" role="img" aria-label="Flor derecha baja">
+            <use href="#girasol" width="100%" height="100%" />
+          </svg>
+        </div>
+
+      </div>
+
+      <div class="contenedor-sorpresa" id="contenedorSorpresa">
+        <div class="aviso-clic">
+          <span>¡Dale clic aquí!</span>
+          <svg class="flecha-indicadora" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <!-- Flor sorpresa ahora con su tallito, como en la referencia -->
+        <svg class="flor-sorpresa" id="florSorpresa" viewBox="0 0 200 300" role="button" aria-label="Flor sorpresa" title="Haz clic aquí">
+          <path class="tallo-sorpresa" d="M 100 292 L 100 100" />
+          <use href="#girasol" x="0" y="0" width="200" height="200" />
+        </svg>
+      </div>
+
+      <p class="nota nota-1">Mi cómplice de vida<br /><span>♡</span></p>
+      <p class="nota nota-2">Mi mejor amiga<br /><span>♡</span></p>
+      <p class="nota nota-3">Mi gran apoyo<br />Gracias por existir<br /><span>♡</span></p>
+      <p class="nota nota-4">Incondicional<br /><span>♡</span></p>
+    </main>
+  </div>
+
+  <div class="modal-overlay oculto" id="modalOverlay">
+    <div class="modal-caja">
+      <button class="modal-cerrar" id="modalCerrar" aria-label="Cerrar mensaje">✕</button>
+      <p class="modal-emoji">🌻</p>
+      <p class="modal-mensaje" id="modalMensaje"></p>
+    </div>
+  </div>
+
+  <script>
+    const mensajePersonalizado =
+      "Para Mi Hermanita.\n\nCada pétalo de este ramo es un recordatorio de lo afortunado que soy de tenerte como hermana.\n\n¡Feliz 21 de septiembre, Hermana!. 🌻";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      generarDestellos();
+      configurarReproductor();
+      configurarFlorSorpresa();
+      configurarModal();
+      iniciarPantallaCarga();
+    });
+
+    function iniciarPantallaCarga() {
+      const loader = document.getElementById("loaderPantalla");
+      const app = document.querySelector(".app");
+      const loaderTitulo = document.getElementById("loaderTitulo");
+      const loaderCargando = document.getElementById("loaderCargando");
+
+      const petalos = Array.from(
+        document.querySelectorAll(".loader-petalo")
+      ).sort((a, b) => Number(a.dataset.orden) - Number(b.dataset.orden));
+
+      const inicioPetalos = 500;
+      const separacionPetalos = 320;
+      const duracionPetalo = 900;
+
+      petalos.forEach((petalo, indice) => {
+        setTimeout(() => {
+          petalo.classList.add("mostrar");
+        }, inicioPetalos + indice * separacionPetalos);
+      });
+
+      const finPetalos =
+        inicioPetalos + petalos.length * separacionPetalos + duracionPetalo;
+
+      setTimeout(() => {
+        loaderTitulo.classList.add("mostrar");
+        loaderCargando.classList.add("mostrar");
+      }, finPetalos);
+
+      const tiempoDeLectura = 1600;
+      const inicioSalida = finPetalos + 600 + tiempoDeLectura;
+
+      setTimeout(() => {
+        loader.classList.add("ocultar");
+        app.classList.add("mostrar");
+      }, inicioSalida);
+
+      setTimeout(() => {
+        if (loader) loader.remove();
+      }, inicioSalida + 700);
+    }
+
+    function generarDestellos(cantidad = 28) {
+      const fondo = document.getElementById("fondoEstrellado");
+
+      for (let i = 0; i < cantidad; i++) {
+        const destello = document.createElement("div");
+        destello.className = "destello";
+
+        const izquierda = Math.random() * 100;
+        const retraso = Math.random() * 12;
+        const duracion = 8 + Math.random() * 10;
+        const escala = 0.5 + Math.random() * 1.2;
+
+        destello.style.left = `${izquierda}vw`;
+        destello.style.bottom = `-10px`;
+        destello.style.animationDelay = `${retraso}s`;
+        destello.style.animationDuration = `${duracion}s`;
+        destello.style.transform = `scale(${escala})`;
+
+        fondo.appendChild(destello);
+      }
+    }
+
+    function configurarReproductor() {
+      const audio = document.getElementById("audioMusica");
+      const btnPlay = document.getElementById("btnPlay");
+      const iconoPlay = document.getElementById("iconoPlay");
+      const iconoPause = document.getElementById("iconoPause");
+      const barraContenedor = document.getElementById("barraContenedor");
+      const barraProgreso = document.getElementById("barraProgreso");
+      const barraPunto = document.getElementById("barraPunto");
+      const tiempoActualEl = document.getElementById("tiempoActual");
+      const tiempoTotalEl = document.getElementById("tiempoTotal");
+
+      if (!audio || !btnPlay) return;
+
+      function formatearTiempo(segundos) {
+        if (!isFinite(segundos) || isNaN(segundos)) return "0:00";
+        const min = Math.floor(segundos / 60);
+        const seg = Math.floor(segundos % 60)
+          .toString()
+          .padStart(2, "0");
+        return `${min}:${seg}`;
+      }
+
+      audio.addEventListener("loadedmetadata", () => {
+        tiempoTotalEl.textContent = formatearTiempo(audio.duration);
+      });
+
+      btnPlay.addEventListener("click", () => {
+        if (audio.paused) {
+          audio.play().catch(() => {
+            console.warn("No se pudo reproducir el audio automáticamente.");
+          });
+        } else {
+          audio.pause();
+        }
+      });
+
+      audio.addEventListener("play", () => {
+        iconoPlay.classList.add("oculto");
+        iconoPause.classList.remove("oculto");
+      });
+
+      audio.addEventListener("pause", () => {
+        iconoPlay.classList.remove("oculto");
+        iconoPause.classList.add("oculto");
+      });
+
+      audio.addEventListener("timeupdate", () => {
+        if (!audio.duration) return;
+        const porcentaje = (audio.currentTime / audio.duration) * 100;
+        barraProgreso.style.width = `${porcentaje}%`;
+        barraPunto.style.left = `${porcentaje}%`;
+        tiempoActualEl.textContent = formatearTiempo(audio.currentTime);
+      });
+
+      audio.addEventListener("ended", () => {
+        barraProgreso.style.width = "0%";
+        barraPunto.style.left = "0%";
+        tiempoActualEl.textContent = "0:00";
+      });
+
+      barraContenedor.addEventListener("click", (evento) => {
+        if (!audio.duration) return;
+        const rect = barraContenedor.getBoundingClientRect();
+        const porcentajeClic = (evento.clientX - rect.left) / rect.width;
+        audio.currentTime = porcentajeClic * audio.duration;
+      });
+    }
+
+    function configurarFlorSorpresa() {
+      const florSorpresa = document.getElementById("florSorpresa");
+      if (!florSorpresa) return;
+      florSorpresa.addEventListener("click", abrirModal);
+      florSorpresa.setAttribute("tabindex", "0");
+      florSorpresa.setAttribute("role", "button");
+      florSorpresa.addEventListener("keydown", (evento) => {
+        if (evento.key === "Enter" || evento.key === " ") {
+          evento.preventDefault();
+          abrirModal();
+        }
+      });
+    }
+
+    function configurarModal() {
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalCerrar = document.getElementById("modalCerrar");
+      const modalMensaje = document.getElementById("modalMensaje");
+
+      if (!modalOverlay || !modalCerrar || !modalMensaje) return;
+
+      modalMensaje.textContent = mensajePersonalizado;
+      modalCerrar.addEventListener("click", cerrarModal);
+
+      modalOverlay.addEventListener("click", (evento) => {
+        if (evento.target === modalOverlay) {
+          cerrarModal();
+        }
+      });
+
+      document.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && !modalOverlay.classList.contains("oculto")) {
+          cerrarModal();
+        }
+      });
+    }
+
+    function abrirModal() {
+      const modal = document.getElementById("modalOverlay");
+      if (modal) modal.classList.remove("oculto");
+    }
+
+    function cerrarModal() {
+      const modal = document.getElementById("modalOverlay");
+      if (modal) modal.classList.add("oculto");
+    }
+  </script>
+</body>
+</html>
